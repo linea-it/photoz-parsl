@@ -1,0 +1,14 @@
+algorithm: <code>
+phz_root_dir: <repository path>
+inputs:
+  photometric_data: <photometric data path>
+  trainning_file: <trainning tar path>
+settings:
+  photo_corr: <column name to magnitude correction> # e.g.: ebv
+  photo_type: <magnitude column> # e.g.: SOF_BDF_MAG_{}_CORRECTED
+  err_type: <magnitude error column> # e.g.: SOF_BDF_MAG_ERR_{}
+  bands: <band list> # e.g.: [g,r,i,z]
+  partitions: <partition numbers>
+  index: <index column> # e.g.: coadd_objects_id
+  lephare_dir: <lephare dir>
+  run_only: <to test> # determines how many files and how many partitions the code will use. e.g.: [3,2] 3 files and 2 partitions

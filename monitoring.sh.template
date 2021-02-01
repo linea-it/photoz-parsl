@@ -1,0 +1,8 @@
+export CONDAPATH=<conda path>
+export PARSL_MONITOR_PORT=55555
+export PHZ_ROOT=<photoz-parsl repository path>
+
+source $CONDAPATH/activate
+conda activate <env name>
+
+nohup parsl-visualize sqlite:///${PHZ_ROOT}/phz.db --listen 0.0.0.0 --port $PARSL_MONITOR_PORT 2> monitoring.log &
