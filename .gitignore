@@ -1,0 +1,7 @@
+*.log
+*.yml
+*.sh
+*.out
+*.db
+./__pycache__
+./sandbox
