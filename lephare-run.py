@@ -33,8 +33,8 @@ inputs = phz_config.get('inputs', {})
 settings = phz_config.get('settings', {})
 test_env = phz_config.get("test_environment", {})
 
-# Unzipping Photoz Training files
-untar_file(inputs.get('trainning_file'))
+# Unzipping training files
+untar_file(inputs.get('training_file'))
 
 # Getting shifts
 shifts = str(loadtxt("lephare_shifts.txt", dtype="str"))
@@ -45,7 +45,7 @@ photo_type = settings.get('photo_type')
 err_type = settings.get('err_type')
 bands_list = settings.get('bands')
 id_col = settings.get("index")
-limit_sample = test_env.get("limit_sample", None)
+limit_sample = test_env.get("limit_sample", None) if test_env.get("turn_on", False) else None
 npartition = settings.get("partitions", 50)
 lephare_dir = settings.get("lephare_bin")
 
