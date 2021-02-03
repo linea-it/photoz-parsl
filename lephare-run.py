@@ -31,6 +31,7 @@ with open("../config.yml") as _file:
     phz_config = yaml.load(_file, Loader=yaml.FullLoader)
 inputs = phz_config.get('inputs', {})
 settings = phz_config.get('settings', {})
+test_env = phz_config.get("test_environment", {})
 
 # Unzipping Photoz Training files
 untar_file(inputs.get('trainning_file'))
@@ -44,9 +45,9 @@ photo_type = settings.get('photo_type')
 err_type = settings.get('err_type')
 bands_list = settings.get('bands')
 id_col = settings.get("index")
-run_only = settings.get("run_only", None)
+limit_sample = test_env.get("limit_sample", None)
 npartition = settings.get("partitions", 50)
-lephare_dir = settings.get("lephare_dir")
+lephare_dir = settings.get("lephare_bin")
 
 # Preparing LePhare output format
 replace_in_file("zphot.para", "AUTO_ADAPT(.*)YES", "AUTO_ADAPT NO")
@@ -73,8 +74,8 @@ lephare_parameters['dimension_galaxies'] = 0  # being initialized
 photo_files = glob.glob(inputs.get("photometric_data"))
 
 ninterval = 0
-if run_only:
-    nfiles, ninterval = run_only
+if limit_sample:
+    nfiles, ninterval = limit_sample
     photo_files = photo_files[:nfiles]
 
 # Creating outputs directory

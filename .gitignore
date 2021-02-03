@@ -1,6 +1,6 @@
 *.db
 __pycache__
-*.yml
+config.yml
 *.sh
 *.out
 *.log

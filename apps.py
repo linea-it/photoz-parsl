@@ -40,11 +40,11 @@ def run_lephare(key, filename, interval, shifts, zphot_output, photo_type, err_t
 
     os.chdir(lephare_run_path)
     os.environ['LEPHAREWORK'] = os.getcwd()
-    os.environ['LEPHAREDIR'] = lephare_dir
+    os.environ['LEPHAREDIR'] = os.path.dirname(os.path.normpath(lephare_dir))
 
     phzout = 'lephare.out'
 
-    cmd_phz = f'{lephare_dir}/bin/zphota -c zphot.para -PARA_OUT {paraout} -CAT_IN {lephare_input} -CAT_OUT {phzout} -APPLY_SYSSHIFT {shifts}'
+    cmd_phz = f'{lephare_dir}/zphota -c zphot.para -PARA_OUT {paraout} -CAT_IN {lephare_input} -CAT_OUT {phzout} -APPLY_SYSSHIFT {shifts}'
     subplog = open('lephare.log', 'w+')
 
     proc = subprocess.Popen(shlex.split(cmd_phz), stdout=subplog, stderr=subplog, universal_newlines=True)

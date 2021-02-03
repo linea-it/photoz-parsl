@@ -10,5 +10,8 @@ settings:
   bands: <band list> # e.g.: [g,r,i,z]
   partitions: <partition numbers>
   index: <index column> # e.g.: coadd_objects_id
-  lephare_dir: <lephare dir>
-  run_only: <to test> # determines how many files and how many partitions the code will use. e.g.: [3,2] 3 files and 2 partitions
+  lephare_bin: <lephare bin # e.g.: $LEPHAREDIR/source>
+test_environment:
+  turn_on: True
+  executor: "local" # determines the code execution location, we currently have two options: "local" and "htcondor"
+  limit_sample: [1,3] # determines how many files and how many partitions the code will use. e.g.: [1,3] 1 file and 3 partitions
