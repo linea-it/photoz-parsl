@@ -17,12 +17,12 @@ executors = {
     "htcondor": HighThroughputExecutor(
         label='htcondor',
         address=address_by_hostname(),
-        max_workers=100,
+        max_workers=300,
         cores_per_worker=1.2,
         provider=CondorProvider(
-            init_blocks=2,
-            min_blocks=2,
-            max_blocks=3,
+            init_blocks=6,
+            min_blocks=6,
+            max_blocks=7,
             parallelism=1,
             scheduler_options='+RequiresWholeMachine = True',
             worker_init=f"source {phz_root_dir}/env.sh",
@@ -41,7 +41,7 @@ executors = {
     )
 }
 
-executor_key = test_env.get("executor", "local") if test_env.get("turn_on", False) else "local"
+executor_key = phz_config.get("executor", "local")
 executor = executors[executor_key]
 
 config = Config(
