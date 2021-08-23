@@ -1,0 +1,17 @@
+algorithm: <code>
+phz_root_dir: <repository path>
+executor: local # determines the code execution location, we currently have two options: "local" and "htcondor"
+inputs:
+  photometric_data: <photometric data path>
+  training_file: <training tar path>
+settings:
+  photo_corr: <column name to magnitude correction> # e.g.: ebv
+  photo_type: <magnitude column> # e.g.: SOF_BDF_MAG_{}_CORRECTED
+  err_type: <magnitude error column> # e.g.: SOF_BDF_MAG_ERR_{}
+  bands: <band list> # e.g.: [g,r,i,z]
+  partitions: <partition numbers>
+  index: <index column> # e.g.: coadd_objects_id
+  lephare_bin: <lephare bin # e.g.: $LEPHAREDIR/source>
+test_environment:
+  turn_on: True
+  limit_sample: [1,3] # determines how many files and how many partitions the code will use. e.g.: [1,3] 1 file and 3 partitions
