@@ -17,13 +17,12 @@ executors = {
     "htcondor": HighThroughputExecutor(
         label='htcondor',
         address=address_by_hostname(),
-        max_workers=300,
-        cores_per_worker=1.2,
+        max_workers=3,
         provider=CondorProvider(
-            init_blocks=6,
-            min_blocks=6,
-            max_blocks=7,
-            parallelism=1,
+            init_blocks=2,
+            min_blocks=2,
+            max_blocks=5,
+            parallelism=0.5,
             scheduler_options='+RequiresWholeMachine = True',
             worker_init=f"source {phz_root_dir}/env.sh",
             cmd_timeout=120,
@@ -46,6 +45,7 @@ executor = executors[executor_key]
 
 config = Config(
     executors=[executor],
+    run_dir='/lustre/t0/tmp/scratch/',
     monitoring=MonitoringHub(
        hub_address=address_by_hostname(),
        hub_port=55055,

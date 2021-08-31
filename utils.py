@@ -107,7 +107,7 @@ def set_partitions(photo_files, num_chunks, idx):
     Returns:
         list: partitions list
     """
-    
+
     run_list, min_size = list(), 200
 
     for _file in photo_files:
@@ -137,7 +137,7 @@ def set_partitions(photo_files, num_chunks, idx):
             chunk_list.append((first, last))
             first = last
             last += chunk_size
-        
+
         run_list.append(dic_item)
 
     return run_list
@@ -220,6 +220,8 @@ def format_input(idx, table, bands, photo_type, err_type, index_column, corr, ca
         # Eliminating 99's from sample
         mag_values[(mag_values < 0.) + (mag_values > 30.)] = -99.
         err_values[(mag_values < 0.) + (mag_values > 30.)] = -99.
+        mag_values[np.isnan(mag_values)] = -99.
+        err_values[np.isnan(err_values)] = -99.
 
         if corr:
             if not band_upper in CORR_SFD98.keys():
@@ -289,7 +291,6 @@ def create_inputs_symbolic_link(sandbox, thread_dir):
     """
 
     inputs = [
-        ('zphot.para', False), ('zphot_output.para', False),
         ('filt', True), ('lib_bin', True), ('lib_mag', True)
     ]
 
