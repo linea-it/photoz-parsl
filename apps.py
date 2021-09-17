@@ -2,8 +2,12 @@ from parsl import python_app
 
 @python_app
 def create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox):
-    """
-    LePhare step 1: creating SED library
+    """ LePhare step 1: creating SED library
+
+    Args:
+        zphot_para (str): zphot_para path
+        lephare_dir (str): the LePhare installation directory path
+        lephare_sandbox (str): working directory path
     """
     import os
     import subprocess
@@ -26,8 +30,12 @@ def create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox):
 
 @python_app
 def create_filter_set(zphot_para, lephare_dir, lephare_sandbox):
-    """
-    LePhare step 2: creating filter transmission files
+    """ LePhare step 2: creating filter transmission files
+
+    Args:
+        zphot_para (str): zphot_para path
+        lephare_dir (str): the LePhare installation directory path
+        lephare_sandbox (str): working directory path
     """
     import os
     import subprocess
@@ -50,8 +58,12 @@ def create_filter_set(zphot_para, lephare_dir, lephare_sandbox):
 
 @python_app
 def compute_galaxy_mag(zphot_para, lephare_dir, lephare_sandbox):
-    """
-    LePhare step 3: theoretical magnitudes library
+    """ LePhare step 3: theoretical magnitudes library
+
+    Args:
+        zphot_para (str): zphot_para path
+        lephare_dir (str): the LePhare installation directory path
+        lephare_sandbox (str): working directory path
     """
     import os
     import subprocess
