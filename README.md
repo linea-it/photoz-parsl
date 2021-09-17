@@ -71,17 +71,17 @@ The workflow was developed aiming at the best performance based on the current r
 
 7. Help to run the pipeline:
     ```bash
-$ python lephare-run.py -h
-usage: lephare-run.py [-h] [-w WORKING_DIR] config_path
+      $ python lephare-run.py -h
+      usage: lephare-run.py [-h] [-w WORKING_DIR] config_path
 
-positional arguments:
-  config_path           yaml config path
+      positional arguments:
+        config_path           yaml config path
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -w WORKING_DIR, --working_dir WORKING_DIR
-                        run directory
-``` 
+      optional arguments:
+        -h, --help            show this help message and exit
+        -w WORKING_DIR, --working_dir WORKING_DIR
+                              run directory
+   ``` 
 
 ### Monitoring
 
