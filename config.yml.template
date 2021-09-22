@@ -3,7 +3,8 @@ phz_root_dir: <repository path>
 executor: local # determines the code execution location, we currently have two options: "local" and "htcondor"
 inputs:
   photometric_data: <photometric data path>
-  training_file: <training tar path>
+  zphot: <zphot.para path>
+output_dir: outputs
 settings:
   photo_corr: <column name to magnitude correction> # e.g.: ebv
   photo_type: <magnitude column> # e.g.: SOF_BDF_MAG_{}_CORRECTED

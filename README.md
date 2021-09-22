@@ -53,7 +53,7 @@ The workflow was developed aiming at the best performance based on the current r
     executor: local # determines the code execution location, we currently have two options: "local" and "htcondor"
     inputs:
         photometric_data: <photometric data path>
-        training_file: <training tar path>
+        zphot: <zphot.para path>
     settings:
         photo_corr: <column name to magnitude correction> # e.g.: ebv
         photo_type: <magnitude column> # e.g.: SOF_BDF_MAG_{}_CORRECTED
@@ -69,10 +69,19 @@ The workflow was developed aiming at the best performance based on the current r
     </td>
     </tr>
 
-7. Run the workflow with:
+7. Help to run the pipeline:
     ```bash
-    python lephare-run.py
-    ``` 
+      $ python lephare-run.py -h
+      usage: lephare-run.py [-h] [-w WORKING_DIR] config_path
+
+      positional arguments:
+        config_path           yaml config path
+
+      optional arguments:
+        -h, --help            show this help message and exit
+        -w WORKING_DIR, --working_dir WORKING_DIR
+                              run directory
+   ``` 
 
 ### Monitoring
 
