@@ -2,7 +2,6 @@
 
 Repository to test the refactoring of the photo-z related pipelines from the [DES Science Portal](https://des-portal.linea.gov.br/) using [Parsl](https://parsl.readthedocs.io/en/stable/).
 
-## LePhare workflow
 The workflow was developed aiming at the best performance based on the current resources of the LIneA environment, however it can be used in any environment that fulfills the following requirements:
 
 * [Conda installed](https://docs.conda.io/en/latest/miniconda.html) and creation of the environment with the file environment.yml.
