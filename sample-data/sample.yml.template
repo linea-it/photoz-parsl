@@ -10,7 +10,7 @@ settings:
   err_type: MAGERR_AUTO_{}  # e.g.: SOF_BDF_MAG_ERR_{}
   bands: [G,R,I,Z]
   partitions: 4
-  index: COADD_OBJECT_ID
+  index: ID
   lephare_bin: LEPHAREDIR
 test_environment:
   turn_on: False
