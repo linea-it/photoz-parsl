@@ -31,6 +31,7 @@ The workflow was developed aiming at the best performance based on the current r
     ```bash
     export CONDAPATH=<conda path> #e.g.:/home/fulano/miniconda3/bin
     export PHZ_ROOT=<photoz-parsl repository path>
+    export LEPHAREDIR=<LePhare dir>
     ```
 
 4. Sets the environment:
