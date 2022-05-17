@@ -1,0 +1,17 @@
+algorithm: lephare
+phz_root_dir: PHZ_ROOT
+executor: local # determines the code execution location, we currently have two options: "local" and "htcondor"
+inputs:
+  photometric_data: PHZ_ROOT/sample-data/cats/*.parquet
+  zphot: PHZ_ROOT/sample-data/zphot/zphot.para
+output_dir: data/outputs
+settings:
+  photo_type: MAG_AUTO_{}  # e.g.: SOF_BDF_MAG_{}_CORRECTED
+  err_type: MAGERR_AUTO_{}  # e.g.: SOF_BDF_MAG_ERR_{}
+  bands: [G,R,I,Z]
+  partitions: 4
+  index: COADD_OBJECT_ID
+  lephare_bin: LEPHAREDIR
+test_environment:
+  turn_on: False
+  limit_sample: [1,2] # determines how many files and how many partitions the code will use. e.g.: [1,3] 1 file and 3 partitions

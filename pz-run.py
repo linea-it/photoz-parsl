@@ -7,14 +7,11 @@ from apps import (
 from utils import (
     create_dir, prepare_format_output, set_partitions
 )
-from numpy import loadtxt
 import time
 import yaml
 import os
 import glob
-import shutil
 import logging
-import datetime
 import argparse
 
 
@@ -25,11 +22,13 @@ def run(phz_config, parsl_config):
         phz_config (dict): Photo-z pipeline configuration - available in the config.yml
         parsl_config (dict): Parsl config
     """
+    lephare_sandbox = os.getcwd()
 
     logger = logging.getLogger(__name__)
-    handler = logging.FileHandler('run-lephare.log')
+    handler = logging.FileHandler(os.path.join(lephare_sandbox, 'pipeline.log'))
     formatter = logging.Formatter(
-            '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+    )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
@@ -38,20 +37,19 @@ def run(phz_config, parsl_config):
     logger.info('LePhare pipeline')
     logger.info('-> Loading configurations')
 
-    lephare_sandbox = os.getcwd()
-
     # Changing run directory to sandbox in "child jobs".
     parsl_config.run_dir = os.path.join(lephare_sandbox, "runinfo")
 
     # Settings Parsl configurations
+    parsl.clear()
     parsl.load(parsl_config)
 
     inputs = phz_config.get('inputs', {})
     output_dir = phz_config.get('output_dir', {})
     settings = phz_config.get('settings', {})
     test_env = phz_config.get("test_environment", {})
-
     zphot_para = inputs.get('zphot')
+
     lephare_dir = settings.get("lephare_bin")
 
     # Creating LePhare dirs
@@ -64,15 +62,21 @@ def run(phz_config, parsl_config):
     start_time = time.time()
 
     logger.info("-> Step 1: creating SED library")
-    gallib = create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox)
+    gallib = create_galaxy_lib(
+        zphot_para, lephare_dir, lephare_sandbox, stdout='sedtolib.log'
+    )
     gallib.result()
 
     logger.info("-> Step 2: creating filter transmission files")
-    filterset = create_filter_set(zphot_para, lephare_dir, lephare_sandbox)
+    filterset = create_filter_set(
+        zphot_para, lephare_dir, lephare_sandbox, stdout='filter.log'
+    )
     filterset.result()
 
     logger.info("-> Step 3: theoretical magnitudes library")
-    galmag = compute_galaxy_mag(zphot_para, lephare_dir, lephare_sandbox)
+    galmag = compute_galaxy_mag(
+        zphot_para, lephare_dir, lephare_sandbox, stdout='mag_gal.log'
+    )
     galmag.result()
 
     logger.info("   steps 1,2 and 3 completed: %s seconds" % (int(time.time() - start_time)))
@@ -88,7 +92,7 @@ def run(phz_config, parsl_config):
     id_col = settings.get("index")
     shifts = settings.get("shifts", None)
     limit_sample = test_env.get("limit_sample", None) if test_env.get("turn_on", False) else None
-    npartition = settings.get("partitions", 50)
+    npartition = int(settings.get("partitions", 50))
 
     # Reading zphot.para
     dic = dict()
@@ -96,8 +100,7 @@ def run(phz_config, parsl_config):
         for line in conffile.read().splitlines():
             dic[line.split()[0]] = "".join(line.split()[1:])
 
-    sed = dic.get('GAL_SED')
-    paraout = dic['PARA_OUT']
+    paraout = dic.get('PARA_OUT')
     cat_fmt = str(dic['CAT_FMT'])
 
     # Preparing LePhare output format
@@ -115,11 +118,13 @@ def run(phz_config, parsl_config):
     # Creating outputs directory
     create_dir(output_dir)
 
+    logger.info(f"Partitions: {photo_files} {npartition} {id_col}")
+
     # Settings partitions in photometrics data
     partitions_list = set_partitions(photo_files, npartition, id_col)
 
     # Creating Lephare's runs list
-    counter, procs = 0, list()
+    counter, procs = 1, list()
 
     for item in partitions_list:
         filename = item.get("path")
@@ -131,11 +136,11 @@ def run(phz_config, parsl_config):
             create_dir(output_dir_file)
             phot_out = os.path.join(
                 output_dir_file,
-                f'photz-{str(counter).zfill(3)}-{os.path.basename(filename)}'
+                f'photz-{str(counter).zfill(5)}.parquet'
             )
             procs.append(run_zphot(counter, filename, interval, shifts, phot_out, photo_type,
-                err_type, apply_corr, bands_list, sed, zphot_para, id_col, cat_fmt, idxs, namephotoz,
-                lephare_dir, lephare_sandbox
+                err_type, apply_corr, bands_list, zphot_para, id_col, cat_fmt, idxs, namephotoz,
+                lephare_dir, lephare_sandbox, stdout=f'zphot-{counter}.log'
             ))
             counter += 1
 
@@ -148,31 +153,27 @@ def run(phz_config, parsl_config):
     logger.info("Full runtime: %s seconds" % (int(time.time() - start_time_full)))
     parsl.clear()
 
+if __name__ == '__main__':
+    working_dir = os.getcwd()
 
-working_dir = os.getcwd()
+    # Create the parser and add arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(dest='config_path', help="yaml config path")
+    parser.add_argument("-w", "--working_dir", dest="working_dir", default=working_dir, help="run directory")
 
-# Create the parser and add arguments
-parser = argparse.ArgumentParser()
-parser.add_argument(dest='config_path', help="yaml config path")
-parser.add_argument("-w", "--working_dir", dest="working_dir", default=working_dir, help="run directory")
+    args = parser.parse_args()
+    working_dir = args.working_dir
+    config_path = args.config_path
 
-args = parser.parse_args()
-working_dir = args.working_dir
-config_path = args.config_path
+    # Loading Lephare configurations
+    with open(config_path) as _file:
+        phz_config = yaml.load(_file, Loader=yaml.FullLoader)
 
-# Loading Lephare configurations
-with open(config_path) as _file:
-    phz_config = yaml.load(_file, Loader=yaml.FullLoader)
+    # Create sandbox dir
+    lephare_sandbox = f'{working_dir}/sandbox/'
+    create_dir(lephare_sandbox, chdir=True, rmtree=True)
 
-# Create sandbox dir
-lephare_sandbox = f'{working_dir}/sandbox/'
-create_dir(lephare_sandbox, chdir=True, rmtree=True)
+    parsl_config = get_config(phz_config)
 
-parsl_config = get_config(phz_config)
-
-# Run Photo-z
-run(phz_config, parsl_config)
-
-# Returning to original path
-os.chdir(working_dir)
-
+    # Run Photo-z
+    run(phz_config, parsl_config)

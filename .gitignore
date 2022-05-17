@@ -1,8 +1,11 @@
 *.db
 __pycache__
 config.yml
-*.sh
+sample-data/sample.yml
+sample-data/zphot/zphot.para
+env.sh
 *.out
 *.log
 ./sandbox/
 ./sandbox/*
+.ipynb_checkpoints/
