@@ -17,7 +17,7 @@ The workflow was developed aiming at the best performance based on the current r
 1. Clone the repository and create an environment with Conda:
     ```bash
     git clone https://github.com/linea-it/photoz-parsl && cd photoz-parsl 
-    conda create -n parsl-env python=3.6
+    conda create -n parsl-env python=3.9
     conda activate parsl-env 
     pip install -r requirements.pip
     ```
