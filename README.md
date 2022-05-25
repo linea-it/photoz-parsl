@@ -17,7 +17,7 @@ The workflow was developed aiming at the best performance based on the current r
 1. Clone the repository and create an environment with Conda:
     ```bash
     git clone https://github.com/linea-it/photoz-parsl && cd photoz-parsl 
-    conda create -n parsl-env python=3.6
+    conda create -n parsl-env python=3.9
     conda activate parsl-env 
     pip install -r requirements.pip
     ```
@@ -31,6 +31,7 @@ The workflow was developed aiming at the best performance based on the current r
     ```bash
     export CONDAPATH=<conda path> #e.g.:/home/fulano/miniconda3/bin
     export PHZ_ROOT=<photoz-parsl repository path>
+    export LEPHAREDIR=<LePhare dir>
     ```
 
 4. Sets the environment:

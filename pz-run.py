@@ -118,8 +118,6 @@ def run(phz_config, parsl_config):
     # Creating outputs directory
     create_dir(output_dir)
 
-    logger.info(f"Partitions: {photo_files} {npartition} {id_col}")
-
     # Settings partitions in photometrics data
     partitions_list = set_partitions(photo_files, npartition, id_col)
 
