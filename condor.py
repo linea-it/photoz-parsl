@@ -1,3 +1,4 @@
+from parsl import ThreadPoolExecutor
 from parsl.config import Config
 from parsl.monitoring.monitoring import MonitoringHub
 from parsl.providers import CondorProvider
@@ -15,13 +16,13 @@ def get_config(phz_config):
     """
 
     phz_root_dir = phz_config.get("phz_root_dir")
-    test_env = phz_config.get("test_environment", {})
 
     executors = {
         "htcondor": HighThroughputExecutor(
             label='htcondor',
             address=address_by_hostname(),
             max_workers=54,
+            worker_debug=True,
             provider=CondorProvider(
                 init_blocks=15,
                 min_blocks=15,
@@ -34,6 +35,7 @@ def get_config(phz_config):
         ),
         "local": HighThroughputExecutor(
             label='local',
+            worker_debug=True,
             provider=LocalProvider(
                 min_blocks=1,
                 init_blocks=1,
@@ -41,6 +43,10 @@ def get_config(phz_config):
                 nodes_per_block=1,
                 parallelism=0.5
             )
+        ),
+        "local_threads": ThreadPoolExecutor(
+            label='local_threads',
+            max_threads=2
         )
     }
 
@@ -50,11 +56,11 @@ def get_config(phz_config):
     return Config(
         executors=[executor],
         monitoring=MonitoringHub(
-           hub_address=address_by_hostname(),
-           hub_port=55055,
-           monitoring_debug=False,
-           logging_endpoint=f"sqlite:///{phz_root_dir}/phz.db",
-           resource_monitoring_interval=10,
-       ),
-       strategy=None
+            hub_address=address_by_hostname(),
+            hub_port=55055,
+            monitoring_debug=False,
+            logging_endpoint=f"sqlite:///{phz_root_dir}/phz.db",
+            resource_monitoring_interval=10,
+        ),
+        strategy=None
     )

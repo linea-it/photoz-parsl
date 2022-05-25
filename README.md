@@ -4,7 +4,7 @@ Repository to test the refactoring of the photo-z related pipelines from the [DE
 
 The workflow was developed aiming at the best performance based on the current resources of the LIneA environment, however it can be used in any environment that fulfills the following requirements:
 
-* [Conda installed](https://docs.conda.io/en/latest/miniconda.html) and creation of the environment with the file environment.yml.
+* [Conda installed](https://docs.conda.io/en/latest/miniconda.html)
 * [LePhare installed](https://www.cfht.hawaii.edu/~arnouts/LEPHARE/lephare.html)
 * For use with [HTCondor](https://htcondor.readthedocs.io/en/latest/):
     * the workstation must be a submission machine for HTCondor.
@@ -17,7 +17,9 @@ The workflow was developed aiming at the best performance based on the current r
 1. Clone the repository and create an environment with Conda:
     ```bash
     git clone https://github.com/linea-it/photoz-parsl && cd photoz-parsl 
-    conda env create -f environment.yml
+    conda create -n parsl-env python=3.9
+    conda activate parsl-env 
+    pip install -r requirements.pip
     ```
 
 2. Copy the file that sets the environment
@@ -29,6 +31,7 @@ The workflow was developed aiming at the best performance based on the current r
     ```bash
     export CONDAPATH=<conda path> #e.g.:/home/fulano/miniconda3/bin
     export PHZ_ROOT=<photoz-parsl repository path>
+    export LEPHAREDIR=<LePhare dir>
     ```
 
 4. Sets the environment:
@@ -70,8 +73,8 @@ The workflow was developed aiming at the best performance based on the current r
 
 7. Help to run the pipeline:
     ```bash
-      $ python lephare-run.py -h
-      usage: lephare-run.py [-h] [-w WORKING_DIR] config_path
+      python pz-run.py -h
+      usage: pz-run.py [-h] [-w WORKING_DIR] config_path
 
       positional arguments:
         config_path           yaml config path
@@ -81,6 +84,18 @@ The workflow was developed aiming at the best performance based on the current r
         -w WORKING_DIR, --working_dir WORKING_DIR
                               run directory
    ``` 
+
+### Running with a subset of sample data
+
+Prepare the configuration files by running the following script:
+``` bash
+source env-example.sh
+```
+
+Run pz-run.py passing in the example configuration file:
+``` bash
+python pz-run.py sample-data/sample.yml
+```
 
 ### Monitoring
 

@@ -3,6 +3,39 @@ import tarfile
 import re
 import pyarrow.parquet as pq
 import shutil
+import logging
+
+
+def get_logger(name=None, stdout=True, debug=False):
+    """
+    Returns a logger object
+    
+    Args:
+        name (string, optional): logger name. Defaults to None.
+        stdout (boolean, optional): print to stdout. Defaults to True.
+        debug (boolean, optional): print debug messages. Defaults to False.
+    
+    Returns:
+        logger: logger object
+    """
+
+    if not name:
+        name = __name__
+
+    logger = logging.getLogger(name)
+
+    if stdout:
+        handler = logging.FileHandler(stdout)
+        formatter = logging.Formatter(
+            '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    if debug:
+        logger.setLevel(logging.DEBUG)
+
+    return logger
 
 
 def create_dir(path, chdir=False, rmtree=False):
@@ -23,33 +56,33 @@ def create_dir(path, chdir=False, rmtree=False):
         os.chdir(path)
 
 
-def untar_file(filepath):
-    """ Unzips tar files
+# def untar_file(filepath):
+#     """ Unzips tar files
 
-    Args:
-        filepath (string): path to tar file
-    """
+#     Args:
+#         filepath (string): path to tar file
+#     """
 
-    tar = tarfile.open(filepath, "r")
-    tar.extractall()
-    tar.close()
+#     tar = tarfile.open(filepath, "r")
+#     tar.extractall()
+#     tar.close()
 
 
-def replace_in_file(filepath, old, new):
-    """ Replaces string in text file
+# def replace_in_file(filepath, old, new):
+#     """ Replaces string in text file
 
-    Args:
-        filepath (string): file path
-        old (string): old string
-        new (string): new string
-    """
+#     Args:
+#         filepath (string): file path
+#         old (string): old string
+#         new (string): new string
+#     """
 
-    with open(filepath, "rt") as fin:
-        data = fin.read()
-        data = re.sub(r"%s" % old, new, data)
+#     with open(filepath, "rt") as fin:
+#         data = fin.read()
+#         data = re.sub(r"%s" % old, new, data)
 
-    with open(filepath, "wt") as fin:
-        fin.write(data)
+#     with open(filepath, "wt") as fin:
+#         fin.write(data)
 
 
 def prepare_format_output(bands_list, zphot_output):
@@ -74,7 +107,7 @@ def prepare_format_output(bands_list, zphot_output):
                 if len(col) > 0:
                     if '()' in col:
                         for band in bands_list:
-                            column_names.append(col.replace('()', str('_' + band.upper())))
+                            column_names.append(col.replace('()', str('_' + band)))
                     else:
                         column_names.append(col)
 
@@ -117,9 +150,8 @@ def set_partitions(photo_files, num_chunks, idx):
         pf = pq.read_table(_file, columns=[idx])
         num_entries = pf.num_rows
 
-        if min_size:
-            if num_entries/num_chunks < min_size:
-                num_chunks = num_entries/min_size
+        if num_entries/num_chunks < min_size:
+            num_chunks = int(num_entries/min_size)
 
         if num_chunks > num_entries or num_chunks == 0:
             num_chunks = 1
@@ -130,7 +162,7 @@ def set_partitions(photo_files, num_chunks, idx):
         first = 0
         last = chunk_size
 
-        for x in range(num_chunks):
+        for x in range(int(num_chunks)):
             if x < rest:
                 last += 1
 
@@ -163,8 +195,8 @@ def get_photometric_columns(bands, photo_type, err_type, idx, corr=None):
         columns_list.append(corr)
 
     for band in bands:
-        nmag = photo_type.format(band).lower()
-        nerr = err_type.format(band).lower()
+        nmag = photo_type.format(band)
+        nerr = err_type.format(band)
         columns_list.append(nmag)
         columns_list.append(nerr)
 
@@ -203,17 +235,14 @@ def format_input(idx, table, bands, photo_type, err_type, index_column, corr, ca
     ids = table.get(index_column).to_numpy()
     n_gals = len(ids)
     gal_number = range(1, n_gals + 1, 1)
-
     _format = ['%10d']
-
     mags, errs = {}, {}
 
     for band in bands:
-        band_upper = band.upper()
-        mag_values = table.get(photo_type.format(band_upper).lower()).to_numpy()
+        mag_values = table.get(photo_type.format(band)).to_numpy()
 
         if err_type: #TODO: in simulation case: the value will be None
-            err_values = table.get(err_type.format(band_upper).lower()).to_numpy()
+            err_values = table.get(err_type.format(band)).to_numpy()
         else:
             err_values = np.ones_like(mag_values)
 
@@ -224,13 +253,13 @@ def format_input(idx, table, bands, photo_type, err_type, index_column, corr, ca
         err_values[np.isnan(err_values)] = -99.
 
         if corr:
-            if not band_upper in CORR_SFD98.keys():
-                mag = photo_type.format(band_upper)
+            if not band in CORR_SFD98.keys():
+                mag = photo_type.format(band)
                 print(f"\n\nFailed to correct column magnitude {mag}")
                 raise BaseException
 
             corr_col = table.get(corr).to_numpy()
-            mag_values[mag_values != -99.] = mag_values[mag_values != -99.] - (CORR_SFD98.get(band_upper) * corr_col[mag_values != -99.])
+            mag_values[mag_values != -99.] = mag_values[mag_values != -99.] - (CORR_SFD98.get(band) * corr_col[mag_values != -99.])
 
         mags[band] = mag_values
         errs[band] = err_values
