@@ -6,8 +6,8 @@ inputs:
   zphot: PHZ_ROOT/sample-data/zphot/zphot.para
 output_dir: data/outputs
 settings:
-  photo_type: MAG_AUTO_{}  # e.g.: SOF_BDF_MAG_{}_CORRECTED
-  err_type: MAGERR_AUTO_{}  # e.g.: SOF_BDF_MAG_ERR_{}
+  photo_type: MAG_AUTO_{}  # e.g.: MAG_{}
+  err_type: MAGERR_AUTO_{}  # e.g.: MAG_ERR_{}
   bands: [G,R,I,Z]
   partitions: 4
   index: ID
