@@ -89,7 +89,7 @@ The workflow was developed aiming at the best performance based on the current r
 
 Prepare the configuration files by running the following script:
 ``` bash
-source env-example.sh
+python prep-env.py
 ```
 
 Run pz-run.py passing in the example configuration file:
