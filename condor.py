@@ -34,23 +34,20 @@ def get_config(phz_config):
             ),
         ),
         "sdumont": HighThroughputExecutor(
-            address=address_by_interface('ib0'),# address_by_hostname(),
-            label='htex',
-            # cores_per_worker=24, # number of cores used by one task
-            max_workers=1, # number of cores per node           
+            address=address_by_interface('ib0'),
+            label='sd',
+            max_workers=24, # number of cores per node           
             provider=SlurmProvider(
-                partition='cpu_dev',
-                nodes_per_block=1, # number of nodes
-                # cmd_timeout = 120, # duration for which the provider will wait for a command to be invoked on a remote system
-                init_blocks=1,
-                # launcher=SrunLauncher(overrides='-c 24'),
-                max_blocks=1,
-                min_blocks=1,
+                partition='cpu_small',
+                nodes_per_block=10, # number of nodes
+                cmd_timeout=240, # duration for which the provider will wait for a command to be invoked on a remote system
+                launcher=SrunLauncher(debug=True, overrides=''),
+                init_blocks=5,
+                min_blocks=5,
+                max_blocks=5,
                 parallelism=1,
-                move_files=False,
-                # scheduler_options = '#SBATCH -J WfRNAseq\n',
-                walltime='00:20:00',
-                worker_init=f"source {phz_root_dir}/env-sd.sh"
+                walltime='03:20:00',
+                worker_init=f"source {phz_root_dir}/env.sh\n"
             ),
         ),
         "local": HighThroughputExecutor(
