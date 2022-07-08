@@ -34,7 +34,8 @@ def get_config(phz_config):
             ),
         ),
         "sdumont": HighThroughputExecutor(
-            address=address_by_interface('ib0'),
+            # address=address_by_interface('ib0'),
+            address=address_by_hostname(),
             label='sd',
             max_workers=24, # number of cores per node           
             provider=SlurmProvider(
