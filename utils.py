@@ -1,12 +1,12 @@
 import os
-import tarfile
-import re
+# import tarfile
+# import re
 import pyarrow.parquet as pq
 import shutil
 import logging
 
 
-def get_logger(name=None, stdout=True, debug=False):
+def get_logger(name=None, stdout=True, level='info'):
     """
     Returns a logger object
     
@@ -18,6 +18,14 @@ def get_logger(name=None, stdout=True, debug=False):
     Returns:
         logger: logger object
     """
+
+    log_debug = {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'critical': logging.CRITICAL
+    }
 
     if not name:
         name = __name__
@@ -32,8 +40,7 @@ def get_logger(name=None, stdout=True, debug=False):
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    if debug:
-        logger.setLevel(logging.DEBUG)
+    logger.setLevel(log_debug[level])
 
     return logger
 
@@ -54,35 +61,6 @@ def create_dir(path, chdir=False, rmtree=False):
 
     if chdir:
         os.chdir(path)
-
-
-# def untar_file(filepath):
-#     """ Unzips tar files
-
-#     Args:
-#         filepath (string): path to tar file
-#     """
-
-#     tar = tarfile.open(filepath, "r")
-#     tar.extractall()
-#     tar.close()
-
-
-# def replace_in_file(filepath, old, new):
-#     """ Replaces string in text file
-
-#     Args:
-#         filepath (string): file path
-#         old (string): old string
-#         new (string): new string
-#     """
-
-#     with open(filepath, "rt") as fin:
-#         data = fin.read()
-#         data = re.sub(r"%s" % old, new, data)
-
-#     with open(filepath, "wt") as fin:
-#         fin.write(data)
 
 
 def prepare_format_output(bands_list, zphot_output):

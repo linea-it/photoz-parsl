@@ -1,10 +1,10 @@
 from parsl import ThreadPoolExecutor
 from parsl.config import Config
 from parsl.monitoring.monitoring import MonitoringHub
-from parsl.providers import CondorProvider
-from parsl.providers import LocalProvider
+from parsl.providers import CondorProvider, SlurmProvider, LocalProvider
 from parsl.executors import HighThroughputExecutor
-from parsl.addresses import address_by_hostname
+from parsl.launchers import SrunLauncher
+from parsl.addresses import address_by_hostname, address_by_interface
 
 
 def get_config(phz_config):
@@ -31,6 +31,24 @@ def get_config(phz_config):
                 scheduler_options='+RequiresWholeMachine = True',
                 worker_init=f"source {phz_root_dir}/env.sh",
                 cmd_timeout=120,
+            ),
+        ),
+        "sdumont": HighThroughputExecutor(
+            # address=address_by_interface('ib0'),
+            address=address_by_hostname(),
+            label='sd',
+            max_workers=24, # number of cores per node           
+            provider=SlurmProvider(
+                partition='cpu_small',
+                nodes_per_block=10, # number of nodes
+                cmd_timeout=240, # duration for which the provider will wait for a command to be invoked on a remote system
+                launcher=SrunLauncher(debug=True, overrides=''),
+                init_blocks=5,
+                min_blocks=5,
+                max_blocks=5,
+                parallelism=1,
+                walltime='03:20:00',
+                worker_init=f"source {phz_root_dir}/env.sh\n"
             ),
         ),
         "local": HighThroughputExecutor(

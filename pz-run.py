@@ -1,11 +1,13 @@
 import parsl
-from condor import get_config
+from parsl_config import get_config
 from apps import (
     run_zphot, create_galaxy_lib,
-    create_filter_set, compute_galaxy_mag
+    create_filter_set, compute_galaxy_mag,
+    join_partitions
 )
 from utils import (
-    create_dir, prepare_format_output, set_partitions
+    create_dir, prepare_format_output, set_partitions,
+    get_logger
 )
 import time
 import yaml
@@ -13,6 +15,8 @@ import os
 import glob
 import logging
 import argparse
+
+LEVEL = os.environ.get('PZ_LOG_LEVEL', 'info')
 
 
 def run(phz_config, parsl_config):
@@ -24,14 +28,13 @@ def run(phz_config, parsl_config):
     """
     lephare_sandbox = os.getcwd()
 
-    logger = logging.getLogger(__name__)
-    handler = logging.FileHandler(os.path.join(lephare_sandbox, 'pipeline.log'))
-    formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+    logger = get_logger(
+        name=__name__, level=LEVEL,
+        stdout=os.path.join(lephare_sandbox, 'pipeline.log')
     )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+
+    handler_cons = logging.StreamHandler()
+    logger.addHandler(handler_cons)
 
     start_time_full = time.time()
     logger.info('LePhare pipeline')
@@ -63,19 +66,22 @@ def run(phz_config, parsl_config):
 
     logger.info("-> Step 1: creating SED library")
     gallib = create_galaxy_lib(
-        zphot_para, lephare_dir, lephare_sandbox, stdout='sedtolib.log'
+        zphot_para, lephare_dir, lephare_sandbox,
+        stdout='sedtolib.log', level=LEVEL
     )
     gallib.result()
 
     logger.info("-> Step 2: creating filter transmission files")
     filterset = create_filter_set(
-        zphot_para, lephare_dir, lephare_sandbox, stdout='filter.log'
+        zphot_para, lephare_dir, lephare_sandbox,
+        stdout='filter.log', level=LEVEL
     )
     filterset.result()
 
     logger.info("-> Step 3: theoretical magnitudes library")
     galmag = compute_galaxy_mag(
-        zphot_para, lephare_dir, lephare_sandbox, stdout='mag_gal.log'
+        zphot_para, lephare_dir, lephare_sandbox,
+        stdout='mag_gal.log', level=LEVEL
     )
     galmag.result()
 
@@ -138,7 +144,7 @@ def run(phz_config, parsl_config):
             )
             procs.append(run_zphot(counter, filename, interval, shifts, phot_out, photo_type,
                 err_type, apply_corr, bands_list, zphot_para, id_col, cat_fmt, idxs, namephotoz,
-                lephare_dir, lephare_sandbox, stdout=f'zphot-{counter}.log'
+                lephare_dir, lephare_sandbox, stdout=f'zphot-{counter}.log', level=LEVEL
             ))
             counter += 1
 
@@ -148,8 +154,29 @@ def run(phz_config, parsl_config):
         proc.result()
 
     logger.info("   step 4 completed: %s seconds" % (int(time.time() - start_time)))
+    # logger.info("-> Step 5: join the results per partition")
+    # start_time = time.time()
+
+    # procs = list()
+
+    # # Joining the results per partition
+    # for item in glob.glob(os.path.join(output_dir, "*")):
+    #     if not os.path.isdir(item):
+    #         logger.warn(f"   dir not found: {item}")
+    #         continue
+
+    #     basename = os.path.basename(item)
+    #     procs.append(join_partitions(
+    #         item, stdout=os.path.join(lephare_sandbox, f'join-{basename}.log'), level=LEVEL
+    #     ))
+
+    # for proc in procs: 
+    #     proc.result()
+
+    # logger.info("   step 5 completed: %s seconds" % (int(time.time() - start_time)))
     logger.info("Full runtime: %s seconds" % (int(time.time() - start_time_full)))
     parsl.clear()
+
 
 if __name__ == '__main__':
     working_dir = os.getcwd()

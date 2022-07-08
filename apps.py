@@ -2,7 +2,10 @@ from parsl import python_app
 
 
 @python_app
-def create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
+def create_galaxy_lib(
+    zphot_para, lephare_dir, lephare_sandbox,
+    stdout='galaxy_lib.log', level='info'
+    ):
     """ LePhare step 1: creating SED library
 
     Args:
@@ -16,22 +19,9 @@ def create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
     from utils import get_logger
     
     logger = get_logger(
-        name='sedtolib', debug=True,
+        name='sedtolib', level=level,
         stdout=os.path.join(lephare_sandbox, stdout)
     )
-
-    # import logging
-
-    # logger = logging.getLogger('sedtolib')
-    # if stdout:
-    #     handler = logging.FileHandler(os.path.join(lephare_sandbox, stdout))
-    #     formatter = logging.Formatter(
-    #         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-    #     )
-    #     handler.setFormatter(formatter)
-    #     logger.addHandler(handler)
-
-    # logger.setLevel(logging.DEBUG)
 
     logger.info('Creating SED library')
 
@@ -44,7 +34,10 @@ def create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
     cmd_phz = f'{lephare_dir}/sedtolib -t G -c {zphot_para}'
     subplog = open('sedtolib.run', 'w+')
     logger.info(f"Executing {cmd_phz}")
-    proc = subprocess.Popen(shlex.split(cmd_phz), stdout=subplog, stderr=subplog, universal_newlines=True)
+    proc = subprocess.Popen(
+        shlex.split(cmd_phz), stdout=subplog,
+        stderr=subplog, universal_newlines=True
+    )
     proc.wait()
     logger.info(f"Return code = {proc.returncode}")
 
@@ -52,7 +45,10 @@ def create_galaxy_lib(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
 
 
 @python_app
-def create_filter_set(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
+def create_filter_set(
+    zphot_para, lephare_dir, lephare_sandbox,
+    stdout='filter_set.log', level='info'
+    ):
     """ LePhare step 2: creating filter transmission files
 
     Args:
@@ -66,7 +62,7 @@ def create_filter_set(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
     from utils import get_logger
     
     logger = get_logger(
-        name='filter', debug=True,
+        name='filter', level=level,
         stdout=os.path.join(lephare_sandbox, stdout)
     )
 
@@ -80,7 +76,10 @@ def create_filter_set(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
     cmd_phz = f'{lephare_dir}/filter -c {zphot_para} '
     subplog = open('filter.run', 'w+')
     logger.info(f"Executing {cmd_phz}")
-    proc = subprocess.Popen(shlex.split(cmd_phz), stdout=subplog, stderr=subplog, universal_newlines=True)
+    proc = subprocess.Popen(
+        shlex.split(cmd_phz), stdout=subplog,
+        stderr=subplog, universal_newlines=True
+    )
     proc.wait()
     logger.info(f"Return code = {proc.returncode}")
 
@@ -88,7 +87,10 @@ def create_filter_set(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
 
 
 @python_app
-def compute_galaxy_mag(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
+def compute_galaxy_mag(
+    zphot_para, lephare_dir, lephare_sandbox,
+    stdout='galaxy_mag.log', level='info'
+    ):
     """ LePhare step 3: theoretical magnitudes library
 
     Args:
@@ -102,7 +104,7 @@ def compute_galaxy_mag(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
     from utils import get_logger
     
     logger = get_logger(
-        name='mag_gal', debug=True,
+        name='mag_gal', level=level,
         stdout=os.path.join(lephare_sandbox, stdout)
     )
 
@@ -116,7 +118,10 @@ def compute_galaxy_mag(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
     cmd_phz = f'{lephare_dir}/mag_gal -t G -c {zphot_para} '
     subplog = open('mag_gal.run', 'w+')
     logger.info(f"Executing {cmd_phz}")
-    proc = subprocess.Popen(shlex.split(cmd_phz), stdout=subplog, stderr=subplog, universal_newlines=True)
+    proc = subprocess.Popen(
+        shlex.split(cmd_phz), stdout=subplog,
+        stderr=subplog, universal_newlines=True
+    )
     proc.wait()
     logger.info(f"Return code = {proc.returncode}")
 
@@ -124,8 +129,11 @@ def compute_galaxy_mag(zphot_para, lephare_dir, lephare_sandbox, stdout=None):
 
 
 @python_app
-def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_type, apply_corr,
-        bands, zphot, col_index, cat_fmt, idxs, namephotoz, lephare_dir, lephare_sandbox, stdout=None):
+def run_zphot(
+    key, filename, interval, shifts, zphot_output, photo_type,
+    err_type, apply_corr, bands, zphot, col_index, cat_fmt,
+    idxs, namephotoz, lephare_dir, lephare_sandbox,
+    stdout='zphot.log', level='info'):
     """  Runs LePhare for each input data (fits) """
 
     import shutil
@@ -137,7 +145,8 @@ def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_typ
     import os
     from numpy import loadtxt
     from utils import (
-        create_dir, get_photometric_columns, format_input, create_inputs_symbolic_link
+        create_dir, get_photometric_columns,
+        format_input, create_inputs_symbolic_link
     )
     from utils import get_logger
 
@@ -145,7 +154,7 @@ def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_typ
     create_dir(lephare_run_path)
 
     logger = get_logger(
-        name='mag_gal', debug=True,
+        name='zphot', level=level,
         stdout=os.path.join(lephare_run_path, stdout)
     )
 
@@ -157,10 +166,14 @@ def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_typ
     os.chdir(lephare_sandbox)  
 
     # Gets the list of columns used by LePhare to filter photometric data
-    columns_list = get_photometric_columns(bands, photo_type, err_type, col_index, apply_corr)
+    columns_list = get_photometric_columns(
+        bands, photo_type, err_type, col_index, apply_corr
+    )
 
     # Loading in memory only the range of selected rows
-    table = parq.read_table(filename, columns=columns_list)[interval[0]:interval[1]]
+    table = parq.read_table(
+        filename, columns=columns_list
+    )[interval[0]:interval[1]]
     tb = table.to_pandas()
 
     # Gets the index column to be added to the final result
@@ -176,7 +189,6 @@ def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_typ
 
     os.chdir(lephare_run_path)
     os.environ['LEPHAREWORK'] = os.getcwd()
-    # os.environ['LEPHAREDIR'] = os.path.dirname(os.path.normpath(lephare_dir))
 
     shifts = f'-APPLY_SYSSHIFT {shifts}' if shifts else str()
     phzout = 'lephare.out'
@@ -190,7 +202,10 @@ def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_typ
 
     subplog = open('zphot.run', 'w+')
 
-    proc = subprocess.Popen(shlex.split(cmd_phz), stdout=subplog, stderr=subplog, universal_newlines=True)
+    proc = subprocess.Popen(
+        shlex.split(cmd_phz), stdout=subplog,
+        stderr=subplog, universal_newlines=True
+    )
     proc.wait()
     logger.info(f"Return code = {proc.returncode}")
 
@@ -218,3 +233,21 @@ def run_zphot(key, filename, interval, shifts, zphot_output, photo_type, err_typ
     os.chdir(origin_path)
 
     return {"name": os.path.basename(filename), "file": zphot_output}
+
+
+@python_app
+def join_partitions(param, stdout='join.log', level='info'):
+    """_summary_
+
+    Args:
+        param (_type_): _description_
+    """
+
+    from utils import get_logger
+
+    logger = get_logger(
+        name='join_partitions', stdout=stdout, level=level
+    )
+
+    logger.info('Joining partitions')
+    logger.info(f'Param: {param}')
